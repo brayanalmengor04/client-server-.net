@@ -1,0 +1,3 @@
+﻿Public Class UsuarioBLL
+    'CRUD COMPLETO DE USUARIO CON LA BASE DE DATOS'
+End Class

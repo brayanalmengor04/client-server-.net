@@ -38,4 +38,9 @@ Public Class LibroBLL
         Return 0 ' Si no hay calificaciones, retorna 0
     End Function
 
+
+
+    'Agregar Crud de libro aqui ---------------------------------------------------------------'
+
+
 End Class
