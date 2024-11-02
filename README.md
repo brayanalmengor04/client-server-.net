@@ -43,6 +43,66 @@ CREATE TABLE Calificacion (
 );
 ``` 
 
+# Procedimientos Almacenados para Calificaciones de Libros
+
+Este archivo describe los procedimientos almacenados en MySQL para gestionar y consultar calificaciones de libros en una base de datos.
+
+## Procedimientos
+
+### 1. `CalificarLibro`
+
+Este procedimiento se utiliza para agregar o actualizar la calificación de un libro por parte de un usuario. Si el usuario ya ha calificado el libro previamente, su calificación será actualizada; de lo contrario, se agregará una nueva calificación.
+
+#### Definición
+
+```sql
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CalificarLibro`(
+    IN p_usuario_id INT,
+    IN p_libro_id INT,
+    IN p_calificacion INT
+)
+BEGIN
+    DECLARE existe INT;
+    
+    -- Verificar si el usuario ya ha calificado el libro
+    SELECT COUNT(*) INTO existe
+    FROM Calificacion
+    WHERE usuario_id = p_usuario_id AND libro_id = p_libro_id;
+    
+    IF existe > 0 THEN
+        -- Si ya existe la calificación, se actualiza
+        UPDATE Calificacion
+        SET calificacion = p_calificacion
+        WHERE usuario_id = p_usuario_id AND libro_id = p_libro_id;
+    ELSE
+        -- Si no existe, se inserta una nueva calificación
+        INSERT INTO Calificacion (usuario_id, libro_id, calificacion)
+        VALUES (p_usuario_id, p_libro_id, p_calificacion);
+    END IF;
+
+    -- Calcular el nuevo promedio de calificaciones para el libro
+    SELECT AVG(calificacion) INTO @nuevo_promedio
+    FROM Calificacion
+    WHERE libro_id = p_libro_id;
+
+    -- Devolver el promedio calculado
+    SELECT @nuevo_promedio AS PromedioCalificacion;
+END;
+```  
+```sql
+CREATE DEFINER=`root`@`localhost` PROCEDURE `ObtenerPromedioCalificacion`(
+    IN p_libro_id INT
+)
+BEGIN
+    -- Calcular el promedio de calificación para el libro especificado
+    SELECT AVG(calificacion) AS PromedioCalificacion
+    FROM Calificacion
+    WHERE libro_id = p_libro_id;
+END;
+```
+
+
+
 # Proyecto: Gestión de Usuarios y Libros
 
 Este proyecto permite la administración de usuarios y libros, incluyendo funcionalidades de CRUD (Crear, Leer, Actualizar, Eliminar) para ambos. Además, cuenta con una sección de calificación para los libros que permite asignar una valoración a cada uno de ellos.
